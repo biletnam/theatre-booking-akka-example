@@ -1,0 +1,14 @@
+version: '3.1'
+
+# Describes the dependencies needed for the service to function
+services:
+  zookeeper:
+    image: zookeeper:3.4
+    ports:
+      - "2181:2181"   # Client 
+      - "2888:2888"   # Follower 
+      - "3888:3888"   # Election 
+    networks: 
+      - theatre
+networks: 
+  threatre:
