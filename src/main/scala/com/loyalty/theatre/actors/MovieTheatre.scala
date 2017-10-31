@@ -15,11 +15,14 @@ class MovieTheatre(maxSeatingCapacity: Int) extends Actor with ActorLogging {
 
     case BookTicket(quantity) if quantity == remaining =>
       sender() ! TicketBooked(quantity)
+      log.info("Theatre {} is fully booked", self.path.name)
       context become theatreAtCapacity
 
     case BookTicket(quantity) =>
       sender() ! TicketBooked(quantity)
-      context become theatreWithCapacity(remaining - quantity)
+      val updatedRemaining = remaining - quantity
+      log.debug("Theatre {} has {} tickets remaining", self.path.name, updatedRemaining)
+      context become theatreWithCapacity(updatedRemaining)
   }
 
   // initial state
