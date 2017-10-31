@@ -1,8 +1,8 @@
 package com.loyalty.theatre.actors
 
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.{Actor, ActorLogging, Props}
 
-class MovieTheatre(seatingCapacity: Int) extends Actor with ActorLogging {
+class MovieTheatre(maxSeatingCapacity: Int) extends Actor with ActorLogging {
   import com.loyalty.theatre.actors.MovieTheatre._
 
   def theatreAtCapacity: Receive = {
@@ -23,7 +23,7 @@ class MovieTheatre(seatingCapacity: Int) extends Actor with ActorLogging {
   }
 
   // initial state
-  override def receive: Receive = theatreWithCapacity(seatingCapacity)
+  override def receive: Receive = theatreWithCapacity(maxSeatingCapacity)
 }
 
 object MovieTheatre {
@@ -36,4 +36,6 @@ object MovieTheatre {
   final case class TicketBooked(quantity: Int) extends Response
   final case object NotEnoughSeats extends Response
   final case object CapacityReached extends Response
+
+  def props(maxSeatingCapacity: Int = 50): Props = Props(new MovieTheatre(maxSeatingCapacity))
 }

@@ -23,6 +23,7 @@ libraryDependencies ++= {
     "com.github.TanUkkii007"   %% "akka-cluster-custom-downing"       % "0.0.8",
     "de.heikoseeberger"        %% "constructr"                        % "0.17.0",
     "com.lightbend.constructr" %% "constructr-coordination-zookeeper" % "0.4.0",
+    "org.scalatest"            %% "scalatest"                         % "3.0.4" % Test,
     "ch.qos.logback"           % "logback-classic"                    % "1.2.3"
   )
 }
