@@ -45,6 +45,59 @@ environments that are not completely under your control, like cloud computing pl
 across the world. The larger the cluster, the greater the chance of failure. Therefore, it is very important to have 
 the means to manage a dynamically shrinking/growing set of nodes which is what Akka Cluster provides you.
 
+Here are a couple of key clustering terms that you should understand:
+- `node`: This represents a logical member of a cluster. There can be multiple nodes on a single physical machine, each differentiated by their `hostname`:`port`:`uid` tuple (a node is a cluster enabled actor system).
+- `cluster`: This is a set of `node`s joined together through the membership service for the purpose of performing work.
+- `leader`: This is a single `node` in a `cluster` that performs certain duties, such as managing cluster convergence and member-state transitions.
+
+Every `cluster` is made up of a set of member `node`s, with each member node being identified by a `hostname`:`port`:`uid` 
+tuple. As each actor system comes up, it can specify the `hostname`:`port` part of that identifier via config. Then, 
+the Akk Cluster itself will assign a `uid` to that `node` so that it can be uniquely identified within the cluster. 
+
+Once a particular `hostname`:`port`:`uid` tuple joins a cluster, __it can never join again after leaving__. If the 
+three-part identifier for a `node` is quarantined—through the remote death watch feature — it can never rejoin the cluster 
+again. So, if a `node` shuts down and then comes back up and wants to rejoin the cluster, a new `uid` will be generated for 
+that `node`. This will give it a unique hostname:port:uid tuple again, and allow it to join back in.
+
+The nature of the membership state within the cluster is very dynamic. `Node`s are able to join and leave the cluster at 
+will, making it so that the membership state is a very fluid thing. Even though the state is dynamic and can be 
+constantly changing, every `node` needs to know the current membership state in case it needs to communicate with a 
+component within the cluster. In order to deal with this requirement, the Akka team looked to Amazon's Dynamo whitepaper 
+for inspiration, using a decentralized __gossip__ protocol-based system to manage membership state throughout the cluster.
+
+The important feature of this membership management system is that there is no master of information. It's not like the 
+leader holds and manages the current state and then broadcasts it to the cluster. The state itself is managed within 
+each member `node`, and the `node`s then gossip the current state information randomly throughout the cluster, with a 
+preference to `node`s that have not seen the latest membership state version.
+
+As different changes can happen concurrently (where `node` A can come up and `node` B can go down at the same time), the 
+state data in each `node` uses a data structure called a __vector clock__ to reconcile and merge state differences on 
+the information being gossiped throughout the cluster. As `node`s are seeing the latest state, they are modifying the 
+gossiped information to indicate that they have seen those changes. __Gossip convergence__ occurs when a `node` can 
+prove that the membership-state information he is seeing is also seen by all other `node`s in the cluster. When 
+convergence has occurred, the member-state information is consistent throughout the `node`s in the cluster.
+
+Once the cluster has achieved gossip convergence, a `leader` can be determined. This is not an election process though, 
+as you may see in other cluster-based systems. Selecting the leader is a deterministic process that can be conducted by 
+each node once convergence has occurred. At that point, each `node` just selects the first sorted `node` in the list of 
+members that is able to fulfill this role and selects it as the `leader`. As this list is the same in all `node`s, via 
+convergence, every `node` deterministically selects the same `node` to be the `leader` with no voting process and/or 
+quorum required. Additionally, the `leader` can change at each new point of convergence. This is because the list of 
+`node`s changes and so the first sorted `node` may change as well.
+
+The __`leader`__ is the `node` responsible to shift members in and out of the cluster. If a new `node` comes into the 
+cluster, the `leader` is the one responsible for changing it from the joining state into the up state. Conversely, if a 
+`node` is exiting the cluster, the `leader` will shift it from the exiting state into the removed state. The `leader` 
+also can auto-down `node`s, if configured to do so, if the failure detector has indicated that the `node` is unreachable 
+after a certain amount of time.
+
+![image](https://user-images.githubusercontent.com/14280155/32307189-97ef1e02-bf55-11e7-9e82-2fc2435246f5.png)
+
+Within the cluster, a sophisticated failure detector is employed to continually monitor whether or not the members are 
+currently reachable. This system is based on The Phi Accrual Failure Detector. In this model, instead of a simple yes/no 
+answer for whether a node is reachable, you get a phi score, which is based on a history of failure statistics that are 
+kept over time. If that phi score goes over a configured threshold, then the `node` will be considered down.
+
 ## Cluster Sharding ##
 
 ### Sharding in general ###
