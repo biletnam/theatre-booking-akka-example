@@ -81,7 +81,7 @@ __Shards__ are distributed across the cluster in what are known as __shard regio
 shards. Each node that participates in sharding will host a single shard region for each type of sharded actor. Each 
 region can in turn host multiple shards. All entities within a shard region are represented by the same type of actor.
 
-![image](https://user-images.githubusercontent.com/14280155/32306350-255d06a0-bf51-11e7-85bf-50a741d5b7d1.png)
+![image](https://user-images.githubusercontent.com/14280155/32331240-c3ffe950-bfb8-11e7-9e45-457c4c9a964c.png)
 
 Each individual shard can host many entities. These entities are distributed across the shards according to the 
 computation of the shard ID that you provided.
@@ -93,27 +93,12 @@ entities hosted by the shards. This coordinator is implemented as a
 interaction within the actual message flow is minimized. It only participates in the messaging if the location of the 
 shard is not known. 
 
-![image](https://user-images.githubusercontent.com/14280155/32306466-cdf05c4a-bf51-11e7-8abf-2a46588571d9.png)
-
+![image](https://user-images.githubusercontent.com/14280155/32331333-f73520ba-bfb8-11e7-912c-12ecdcb7427f.png)
 
 In this case, the shard region can communicate with the __shard coordinator__ to locate the shard. That information is 
 then cached. Going forward, messages can be sent directly _without_ the need to communicate with the coordinator.
 
-Here is the general flow when communicating with a shard region to accesses sharded entity actors:
+Here is the general flow when communicating with a shard region to accesses sharded Movie Theatre Entity Actors:
 
-![image](https://user-images.githubusercontent.com/14280155/32307598-a7da2d14-bf57-11e7-9327-a4473bcfe6c0.png)
+![image](https://user-images.githubusercontent.com/14280155/32332348-a8029560-bfbb-11e7-965f-ef091920f604.png)
 
-### A note on consistency ###
-With a basic understanding of how sharding works, __How does it help with consistency specifically?__
-
-Sharding provides a __consistency boundary__ in the form of a __*single consistent actor*__ in the cluster. All 
-communication that is done with a specific entity ID always goes through that actor. The Akka cluster sharding mechanism 
-ensures that only one actor with the given ID is running in the cluster at any time. This means that you can use the 
-single-threaded illusion to your advantage. 
-- You know that any requests will always go to that particular actor 
-- You also know that an actor can process only one message at a time. 
-
-This means that you can _guarantee_ __message ordering__ and __consistent state__ within the bounds of that actor.
-
-By creating a boundary around the consistency and isolating it to a single entity, you can use that boundary to allow 
-scalability. Consistency is limited to a single entity, and therefore you can scale the system across multiple entities.
