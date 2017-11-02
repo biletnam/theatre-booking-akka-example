@@ -86,6 +86,7 @@ then to locate the actor within that shard using the entity ID.
 
 ![image](https://user-images.githubusercontent.com/14280155/32305810-ef5bd94e-bf4d-11e7-9cd2-c933785f99dc.png)
 
+Each entity shown here represents a Movie Theatre Actor.
 
 This makes it possible for you to locate the unique instance of that actor within the cluster. 
 In the event that no actor currently exists, the actor will be created. 
@@ -93,3 +94,24 @@ In the event that no actor currently exists, the actor will be created.
 __The sharding mechanism will ensure that only one instance of each actor (singleton semantics) exists in the cluster 
 at any time.__
 
+__Shards__ are distributed across the cluster in what are known as __shard regions__. These regions act as hosts for the 
+shards. Each node that participates in sharding will host a single shard region for each type of sharded actor. Each 
+region can in turn host multiple shards. All entities within a shard region are represented by the same type of actor.
+
+![image](https://user-images.githubusercontent.com/14280155/32306350-255d06a0-bf51-11e7-85bf-50a741d5b7d1.png)
+
+Each individual shard can host many entities. These entities are distributed across the shards according to the 
+computation of the shard ID that you provided.
+
+Internally, a __shard coordinator__ is used to manage where the shards are located. The coordinator informs shard 
+regions as to the location of individual shards. Those shard regions can in turn be used to send a message to the 
+entities hosted by the shards. This coordinator is implemented as a 
+[cluster singleton](https://doc.akka.io/docs/akka/current/scala/cluster-singleton.html#cluster-singleton). However, its 
+interaction within the actual message flow is minimized. It only participates in the messaging if the location of the 
+shard is not known. 
+
+![image](https://user-images.githubusercontent.com/14280155/32306466-cdf05c4a-bf51-11e7-8abf-2a46588571d9.png)
+
+
+In this case, the shard region can communicate with the shard coordinator to locate the shard. That information is then 
+cached. Going forward, messages can be sent directly _without_ the need to communicate with the coordinator.
