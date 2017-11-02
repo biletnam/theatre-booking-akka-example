@@ -30,18 +30,8 @@ You will receive an `HTTP 403` response with a body telling you `Theatre is at c
 
 ## Cluster Sharding ##
 
-### Sharding in general ###
-Sharding is a powerful technique that makes it possible to scale and distribute databases, while keeping them consistent. 
-The basic idea is that every record in your database has a shard key attached to it. This shard key is used to determine 
-the distribution of data. Rather than storing all records for the database on a single node in the cluster, the records 
-are distributed according to this shard key. 
-
-In the example below, the shard key is `s_no`
-
-![image](https://user-images.githubusercontent.com/14280155/32305059-80098ec8-bf49-11e7-9067-9d42b399b34b.png)
-
 ### Akka Cluster Sharding ###
-Rather than sharding the data, __you shard live actors across the cluster__. Each actor is assigned an entity ID. This 
+The main idea of Akka Cluster Sharding, is to __shard live actors across the cluster__. Each actor is assigned an entity ID. This 
 ID is unique within the cluster. It usually represents the identifier for the domain entity that the actor is modeling. 
 You provide a function that will extract that entity ID from the message being sent. 
 
