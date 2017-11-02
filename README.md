@@ -170,6 +170,10 @@ shard is not known.
 In this case, the shard region can communicate with the __shard coordinator__ to locate the shard. That information is 
 then cached. Going forward, messages can be sent directly _without_ the need to communicate with the coordinator.
 
+Here is the general flow when communicating with a shard region to accesses sharded entity actors:
+
+![image](https://user-images.githubusercontent.com/14280155/32307598-a7da2d14-bf57-11e7-9327-a4473bcfe6c0.png)
+
 ### A note on consistency ###
 With a basic understanding of how sharding works, __How does it help with consistency specifically?__
 
