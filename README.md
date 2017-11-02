@@ -102,3 +102,4 @@ Here is the general flow when communicating with a shard region to accesses shar
 
 ![image](https://user-images.githubusercontent.com/14280155/32332348-a8029560-bfbb-11e7-965f-ef091920f604.png)
 
+![image](https://user-images.githubusercontent.com/14280155/32332890-ecc522fc-bfbc-11e7-97a1-dbfcdec4a517.png)
