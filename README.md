@@ -1,7 +1,7 @@
 # Theatre Booking Example #
 This is an example application that manages the ticketing and capacity for movie theatres. The purpose of this 
-application is to demonstrate different features provided by the Akka toolkit (Clustering, Sharding, HTTP) in order
-to build a robust and scalable system.
+application is to demonstrate different features provided by the [Akka toolkit](https://akka.io) (Clustering, Sharding, 
+HTTP) in order to build a robust and scalable system.
 
 ## Functionality ##
 This application provides a very simple API which allows you to book tickets for a Movie Theatre that has a fixed 
