@@ -50,17 +50,18 @@ Here are a couple of key clustering terms that you should understand:
 - `cluster`: This is a set of `node`s joined together through the membership service for the purpose of performing work.
 - `leader`: This is a single `node` in a `cluster` that performs certain duties, such as managing cluster convergence and member-state transitions.
 
-Every `cluster` is made up of a set of member `node`s, with each member node being identified by a `hostname`:`port`:`uid` 
-tuple. As each actor system comes up, it can specify the `hostname`:`port` part of that identifier via config. Then, 
-the Akk Cluster itself will assign a `uid` to that `node` so that it can be uniquely identified within the cluster. 
+Every `cluster` is made up of a set of member `node`s, with each member `node` being identified by a `hostname`:`port`:`uid` 
+tuple. As each actor system comes up, it can specify the `hostname`:`port` part of that identifier via config. Then, the 
+Akka Cluster itself will assign a `uid` to that `node` so that it can be uniquely identified within the cluster. 
 
-Once a particular `hostname`:`port`:`uid` tuple joins a cluster, __it can never join again after leaving__. If the 
-three-part identifier for a `node` is quarantined—through the remote death watch feature — it can never rejoin the cluster 
-again. So, if a `node` shuts down and then comes back up and wants to rejoin the cluster, a new `uid` will be generated for 
-that `node`. This will give it a unique hostname:port:uid tuple again, and allow it to join back in.
+Once a particular `hostname`:`port`:`uid` tuple joins a `cluster`, __it can never join the `cluster` again after 
+leaving__. If the three-part identifier for a `node` is quarantined—through the remote death watch feature — it can 
+never rejoin the `cluster` again. So, if a `node` shuts down and then comes back up and wants to rejoin the `cluster`, 
+a new `uid` will be generated for that `node`. This will give it a unique `hostname`:`port`:`uid` tuple again, and allow 
+the `node` to join back in.
 
-The nature of the membership state within the cluster is very dynamic. `Node`s are able to join and leave the cluster at 
-will, making it so that the membership state is a very fluid thing. Even though the state is dynamic and can be 
+The nature of the membership state within the cluster is very dynamic. `Node`s are able to join and leave the `cluster` 
+at will, making it so that the membership state is a very fluid thing. Even though the state is dynamic and can be 
 constantly changing, every `node` needs to know the current membership state in case it needs to communicate with a 
 component within the cluster. In order to deal with this requirement, the Akka team looked to Amazon's Dynamo whitepaper 
 for inspiration, using a decentralized __gossip__ protocol-based system to manage membership state throughout the cluster.
