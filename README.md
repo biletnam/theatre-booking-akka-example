@@ -113,5 +113,20 @@ shard is not known.
 ![image](https://user-images.githubusercontent.com/14280155/32306466-cdf05c4a-bf51-11e7-8abf-2a46588571d9.png)
 
 
-In this case, the shard region can communicate with the shard coordinator to locate the shard. That information is then 
-cached. Going forward, messages can be sent directly _without_ the need to communicate with the coordinator.
+In this case, the shard region can communicate with the __shard coordinator__ to locate the shard. That information is 
+then cached. Going forward, messages can be sent directly _without_ the need to communicate with the coordinator.
+
+### A note on consistency ###
+With a basic understanding of how sharding works, __How does it help with consistency specifically?__
+
+Sharding provides a __consistency boundary__ in the form of a __*single consistent actor*__ in the cluster. All 
+communication that is done with a specific entity ID always goes through that actor. The Akka cluster sharding mechanism 
+ensures that only one actor with the given ID is running in the cluster at any time. This means that you can use the 
+single-threaded illusion to your advantage. 
+- You know that any requests will always go to that particular actor 
+- You also know that an actor can process only one message at a time. 
+
+This means that you can _guarantee_ __message ordering__ and __consistent state__ within the bounds of that actor.
+
+By creating a boundary around the consistency and isolating it to a single entity, you can use that boundary to allow 
+scalability. Consistency is limited to a single entity, and therefore you can scale the system across multiple entities.
