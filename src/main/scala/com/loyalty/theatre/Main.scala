@@ -10,13 +10,15 @@ import akka.util.Timeout
 import com.loyalty.theatre.actors.MovieTheatre
 import com.loyalty.theatre.actors.sharding.MovieTheatreSettings
 import com.loyalty.theatre.http.Routes
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 object Main extends App with Routes {
-  implicit val system: ActorSystem = ActorSystem("movie-theatre-ticketing-system")
+  val config = ConfigFactory.load()
+  implicit val system: ActorSystem = ActorSystem(config.getString("app.name"), config)
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val ec: ExecutionContext = system.dispatcher
   val settings = Settings(system)
