@@ -21,10 +21,11 @@ libraryDependencies ++= {
     akka                       %% "akka-http-spray-json"              % akkaHttpV,
     akka                       %% "akka-http-testkit"                 % akkaHttpV % Test,
     "com.github.TanUkkii007"   %% "akka-cluster-custom-downing"       % "0.0.8",
-    "de.heikoseeberger"        %% "constructr"                        % "0.17.0",
+    "de.heikoseeberger"        %% "constructr"                        % "0.18.0",
     "com.lightbend.constructr" %% "constructr-coordination-zookeeper" % "0.4.0",
     "org.scalatest"            %% "scalatest"                         % "3.0.4" % Test,
-    "ch.qos.logback"           % "logback-classic"                    % "1.2.3"
+    "ch.qos.logback"           % "logback-classic"                    % "1.2.3",
+    "org.codehaus.groovy"      % "groovy"                             % "2.4.12"
   )
 }
 
