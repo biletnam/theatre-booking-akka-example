@@ -1,0 +1,524 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Creates a service / task def for sample play",
+  "Parameters": {
+    "ClusterStackName": {
+      "Description": "Name of an active CloudFormation stack that contains an ECS cluster",
+      "Type": "String",
+      "MinLength": 1,
+      "MaxLength": 255,
+      "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9]*$"
+    },
+    "Path": {
+      "Type": "String",
+      "Description": "The path to register the application under the load balancer. Only include path name starting with a /"
+    },
+    "Priority": {
+      "Type": "Number",
+      "Description": "The priority to register with the Load Balancer"
+    },
+    "AppName": {
+      "Type": "String",
+      "Description": "Name of the application. This must be the same as the name of the docker repository.",
+      "Default": "theatre-example"
+    },
+    "AppVersion": {
+      "Type": "String",
+      "Description": "Version label of app"
+    },
+    "AppContainerPort": {
+      "Type": "Number",
+      "Description": "Port the application runs on in the image which exposes web services",
+      "Default": "8080"
+    },
+    "ImageRepository": {
+      "Type": "String",
+      "Description": "The URI of the image repository where the app is published. Do not include app name in URI. Currently only supports private registries (not Docker Hub)",
+      "Default": "824691084780.dkr.ecr.us-east-1.amazonaws.com"
+    },
+    "KinesisStackName": {
+      "Type": "String",
+      "Description": "The name of Kinesis which is unique for each environment, used for logging to Splunk"
+    },
+    "Memory": {
+      "Type": "Number",
+      "Description": "Soft memory on container",
+      "Default": "1024"
+    },
+    "Cpu": {
+      "Type": "Number",
+      "Description": "cpu unites on container",
+      "Default": "100"
+    },
+    "AppDesiredCount": {
+      "Type": "Number",
+      "Description": "Number of instances of the service to run",
+      "Default": "1"
+    },
+    "AppMaxCount": {
+      "Type": "Number",
+      "Description": "Max number of instances of the service to scale out to",
+      "Default": "5"
+    },
+    "AppMinCount": {
+      "Type": "Number",
+      "Description": "Min number of instances of the service to scale in to",
+      "Default": "1"
+    },
+    "AutoScaleHighThreshold": {
+      "Type": "Number",
+      "Description": "Percentage of service memory utilization that is considered high",
+      "Default": "50"
+    },
+    "AutoScaleLowThreshold": {
+      "Type": "Number",
+      "Description": "Percentage of service memory utilization that is considered low",
+      "Default": "20"
+    },
+    "LogRetention": {
+      "Type": "Number",
+      "Description": "Number of days to retain logs in CWL",
+      "Default": "14"
+    },
+    "KmsKey": {
+      "Type": "String",
+      "Description": "The ARN of a KMS CMK to use to decrypt secure environment variables"
+    }
+  },
+  "Resources": {
+    "TargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckIntervalSeconds": 10,
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckTimeoutSeconds": 5,
+        "HealthCheckPath": {
+          "Fn::Sub": "/${Path}/health"
+        },
+        "HealthyThresholdCount": 2,
+        "Matcher": {
+          "HttpCode": "200-299"
+        },
+        "Port": 80,
+        "Protocol": "HTTP",
+        "TargetGroupAttributes": [{
+          "Key": "deregistration_delay.timeout_seconds",
+          "Value": "20"
+        }],
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${ClusterStackName}-VpcId"
+          }
+        },
+        "Tags": [{
+          "Key": "Name",
+          "Value": {
+            "Fn::Sub": "ECS Target Group - ${AWS::StackName}"
+          }
+        }]
+      }
+    },
+    "ListenerRule": {
+      "Type": "AWS::ElasticLoadBalancingV2::ListenerRule",
+      "Properties": {
+        "ListenerArn": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${ClusterStackName}-Listener"
+          }
+        },
+        "Priority": {
+          "Ref": "Priority"
+        },
+        "Conditions": [{
+          "Field": "path-pattern",
+          "Values": [{
+            "Fn::Sub": "/${Path}/*"
+          }]
+        }],
+        "Actions": [{
+          "TargetGroupArn": {
+            "Ref": "TargetGroup"
+          },
+          "Type": "forward"
+        }]
+      }
+    },
+    "EcsTaskRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Sid": "",
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "ecs-tasks.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+          }]
+        },
+
+        "Path": "/",
+        "Policies": [{
+          "PolicyName": "ECS-CMK-Decrypt-Access",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": ["kms:Decrypt"],
+              "Resource": [{
+                "Ref": "KmsKey"
+              }]
+            }]
+          }
+        }]
+      }
+    },
+    "TaskDefinition": {
+      "Type": "AWS::ECS::TaskDefinition",
+      "Properties": {
+        "ContainerDefinitions": [{
+          "Name": {
+            "Ref": "AppName"
+          },
+          "Image": {
+            "Fn::Sub": "${ImageRepository}/${AppName}:${AppVersion}"
+          },
+          "Cpu": {
+            "Ref": "Cpu"
+          },
+          "PortMappings": [{
+            "ContainerPort": {
+              "Ref": "AppContainerPort"
+            },
+            "HostPort": 0,
+            "Description": "Expose the HTTP port that the application uses and assign it to a random port"
+          }, {
+            "ContainerPort": 2551,
+            "HostPort": 0,
+            "Description": "Expose the Akka Clustering port that the application uses and assign it to a random port"
+          }],
+          "Command": ["-J-Xms1024m", "-J-Xmx1024m", "-J-XX:+HeapDumpOnOutOfMemoryError",
+            {
+              "Fn::Sub": "-Dapp.http.context=${Path}"
+            }],
+          "MemoryReservation": {
+            "Ref": "Memory"
+          },
+          "Essential": "true",
+          "LogConfiguration": {
+            "LogDriver": "awslogs",
+            "Options": {
+              "awslogs-group": {
+                "Ref": "LogGroup"
+              },
+              "awslogs-region": {
+                "Ref": "AWS::Region"
+              },
+              "awslogs-stream-prefix": "ecs"
+            }
+          }
+        }],
+        "Volumes": [],
+        "Family": {
+          "Ref": "AWS::StackName"
+        },
+        "TaskRoleArn": {
+          "Ref": "EcsTaskRole"
+        }
+      }
+    },
+    "Service": {
+      "Type": "AWS::ECS::Service",
+      "DependsOn": ["ListenerRule", "LogGroup"],
+      "Properties": {
+        "ServiceName": {
+          "Ref": "AWS::StackName"
+        },
+        "Role": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${ClusterStackName}-EcsServiceRole"
+          }
+        },
+        "TaskDefinition": {
+          "Ref": "TaskDefinition"
+        },
+        "DesiredCount": {
+          "Ref": "AppDesiredCount"
+        },
+        "LoadBalancers": [{
+          "TargetGroupArn": {
+            "Ref": "TargetGroup"
+          },
+          "ContainerPort": {
+            "Ref": "AppContainerPort"
+          },
+          "ContainerName": {
+            "Ref": "AppName"
+          }
+        }],
+        "Cluster": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${ClusterStackName}-ClusterName"
+          }
+        },
+        "PlacementStrategies": [{
+          "Field": "attribute:ecs.availability-zone",
+          "Type": "spread"
+        }, {
+          "Field": "instanceId",
+          "Type": "spread"
+        }],
+        "DeploymentConfiguration": {
+          "MinimumHealthyPercent": 100
+        }
+      }
+    },
+    "LogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "RetentionInDays": {
+          "Ref": "LogRetention"
+        },
+        "LogGroupName": {
+          "Ref": "AWS::StackName"
+        }
+      }
+    },
+    "SubscriptionFilter": {
+      "Type": "AWS::Logs::SubscriptionFilter",
+      "DependsOn": ["LogGroup"],
+      "Properties": {
+        "RoleArn": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${KinesisStackName}-Role-Arn"
+          }
+        },
+        "LogGroupName": {
+          "Ref": "LogGroup"
+        },
+        "FilterPattern": "",
+        "DestinationArn": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${KinesisStackName}-Stream-Arn"
+          }
+        }
+      }
+    },
+    "EcsAutoScaleRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "application-autoscaling.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+          }]
+        },
+        "Path": "/",
+        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole"]
+      }
+    },
+    "ScalableTarget": {
+      "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+      "Properties": {
+        "MaxCapacity": {
+          "Ref": "AppMaxCount"
+        },
+        "MinCapacity": {
+          "Ref": "AppMinCount"
+        },
+        "ResourceId": {
+          "Fn::Join": ["/", ["service",
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${ClusterStackName}-ClusterName"
+              }
+            }, {
+              "Fn::GetAtt": ["Service", "Name"]
+            }]]
+        },
+        "RoleARN": {
+          "Fn::GetAtt": ["EcsAutoScaleRole", "Arn"]
+        },
+        "ScalableDimension": "ecs:service:DesiredCount",
+        "ServiceNamespace": "ecs"
+      }
+    },
+    "ScaleUpPolicy": {
+      "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+      "Properties": {
+        "PolicyName": {
+          "Fn::Join": ["-", [{
+            "Fn::GetAtt": ["Service", "Name"]
+          }, "ScaleUpPolicy"]]
+        },
+        "PolicyType": "StepScaling",
+        "ScalingTargetId": {
+          "Ref": "ScalableTarget"
+        },
+        "StepScalingPolicyConfiguration": {
+          "AdjustmentType": "PercentChangeInCapacity",
+          "Cooldown": 60,
+          "MetricAggregationType": "Average",
+          "StepAdjustments": [{
+            "MetricIntervalLowerBound": 0,
+            "MetricIntervalUpperBound": 10,
+            "ScalingAdjustment": 10
+          }, {
+            "MetricIntervalLowerBound": 10,
+            "ScalingAdjustment": 30
+          }]
+        }
+      }
+    },
+    "ScaleDownPolicy": {
+      "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+      "Properties": {
+        "PolicyName": {
+          "Fn::Join": ["-", [{
+            "Fn::GetAtt": ["Service", "Name"]
+          }, "ScaleDownPolicy"]]
+        },
+        "PolicyType": "StepScaling",
+        "ScalingTargetId": {
+          "Ref": "ScalableTarget"
+        },
+        "StepScalingPolicyConfiguration": {
+          "AdjustmentType": "PercentChangeInCapacity",
+          "Cooldown": 60,
+          "MetricAggregationType": "Average",
+          "StepAdjustments": [{
+            "MetricIntervalLowerBound": -10,
+            "MetricIntervalUpperBound": 0,
+            "ScalingAdjustment": -10
+          }, {
+            "MetricIntervalUpperBound": -10,
+            "ScalingAdjustment": -30
+          }]
+        }
+      }
+    },
+    "MemUtilAlarmHigh": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmDescription": "Memory utilization alarm for ECS service for high mem usage",
+        "AlarmActions": [{
+          "Ref": "ScaleUpPolicy"
+        }],
+        "MetricName": "MemoryUtilization",
+        "Namespace": "AWS/ECS",
+        "Statistic": "Average",
+        "Period": "60",
+        "EvaluationPeriods": "2",
+        "Threshold": {
+          "Ref": "AutoScaleHighThreshold"
+        },
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [{
+          "Name": "ClusterName",
+          "Value": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${ClusterStackName}-ClusterName"
+            }
+          }
+        }, {
+          "Name": "ServiceName",
+          "Value": {
+            "Fn::GetAtt": ["Service", "Name"]
+          }
+        }]
+      }
+    },
+    "MemUtilAlarmLow": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmDescription": "Memory utilization alarm for ECS service for low mem usage",
+        "AlarmActions": [{
+          "Ref": "ScaleDownPolicy"
+        }],
+        "MetricName": "MemoryUtilization",
+        "Namespace": "AWS/ECS",
+        "Statistic": "Average",
+        "Period": "60",
+        "EvaluationPeriods": "2",
+        "Threshold": {
+          "Ref": "AutoScaleLowThreshold"
+        },
+        "ComparisonOperator": "LessThanThreshold",
+        "Dimensions": [{
+          "Name": "ClusterName",
+          "Value": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${ClusterStackName}-ClusterName"
+            }
+          }
+        }, {
+          "Name": "ServiceName",
+          "Value": {
+            "Fn::GetAtt": ["Service", "Name"]
+          }
+        }]
+      }
+    }
+  },
+  "Outputs": {
+    "Service": {
+      "Description": "The name of the ECS service created",
+      "Value": {
+        "Fn::GetAtt": ["Service", "Name"]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-ServiceName"
+        }
+      }
+    },
+    "TaskFamily": {
+      "Description": "The family of the task created for the service",
+      "Value": {
+        "Ref": "AWS::StackName"
+      }
+    },
+    "TaskArn": {
+      "Description": "The ARN of the task created for the service",
+      "Value": {
+        "Ref": "TaskDefinition"
+      }
+    },
+    "ServiceDNS": {
+      "Description": "The dns name of the app load balancer for the service",
+      "Value": {
+        "Fn::Join": ["", [{
+          "Fn::ImportValue": {
+            "Fn::Sub": "${ClusterStackName}-LoadBalancerDNSName"
+          }
+        }, {
+          "Ref": "Path"
+        }]
+
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-LoadBalancerDNSName"
+        }
+      }
+    },
+    "LogGroup": {
+      "Description": "The name of the log group created for the app",
+      "Value": {
+        "Ref": "LogGroup"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-LogGroupName"
+        }
+      }
+    }
+  }
+}
