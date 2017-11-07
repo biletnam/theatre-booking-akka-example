@@ -28,6 +28,10 @@ When the theatre is at capacity (i.e. all tickets have been booked) and you try 
 
 You will receive an `HTTP 403` response with a body telling you `Theatre is at capacity`.
 
+## Deployment ## 
+TODO: Describe how to release using a private Docker Registry like ECR or Docker Hub and deploy the application using
+AWS ECS with `ecs-service`
+
 ## Cluster Sharding ##
 
 ### Akka Cluster Sharding ###
