@@ -1,8 +1,12 @@
+import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport._
+
 name := "theatre-example"
 
 version := "0.1"
 
 scalaVersion := "2.12.4"
+
+lazy val root = (project in file(".")).enablePlugins(JavaAppPackaging)
 
 resolvers += Resolver.bintrayRepo("tanukkii007", "maven")
 
@@ -32,3 +36,6 @@ libraryDependencies ++= {
 scalafmtOnCompile in ThisBuild := true // all projects
 scalafmtOnCompile := true // current project
 scalafmtOnCompile in Compile := true // current project, specific configuration
+
+dockerBaseImage := "loyaltyone/dakka:0.4"
+dockerEntrypoint := "/usr/local/bin/env-decrypt" +: "/usr/local/bin/bootstrap" +: dockerEntrypoint.value
