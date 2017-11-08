@@ -33,8 +33,8 @@
     },
     "ImageRepository": {
       "Type": "String",
-      "Description": "The URI of the image repository where the app is published. Do not include app name in URI. Currently only supports private registries (not Docker Hub)",
-      "Default": "824691084780.dkr.ecr.us-east-1.amazonaws.com"
+      "Description": "The URI of the image repository where the app is published. Do not include app name in URI.",
+      "Default": "rubixcubin"
     },
     "Memory": {
       "Type": "Number",

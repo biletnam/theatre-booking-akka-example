@@ -37,5 +37,7 @@ scalafmtOnCompile in ThisBuild := true // all projects
 scalafmtOnCompile := true // current project
 scalafmtOnCompile in Compile := true // current project, specific configuration
 
+dockerRepository := Some("rubixcubin")
+dockerUpdateLatest := true
 dockerBaseImage := "loyaltyone/dakka:0.4"
 dockerEntrypoint := "/usr/local/bin/env-decrypt" +: "/usr/local/bin/bootstrap" +: dockerEntrypoint.value
