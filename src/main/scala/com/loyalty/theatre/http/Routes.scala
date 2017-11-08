@@ -35,5 +35,7 @@ trait Routes extends SprayJsonSupport {
           log.error(exception, "Failed to book tickets")
           complete(ServiceUnavailable)
       }
+  } ~ (get & path("health")) {
+    complete(OK)
   }
 }
