@@ -36,10 +36,6 @@
       "Description": "The URI of the image repository where the app is published. Do not include app name in URI. Currently only supports private registries (not Docker Hub)",
       "Default": "824691084780.dkr.ecr.us-east-1.amazonaws.com"
     },
-    "KinesisStackName": {
-      "Type": "String",
-      "Description": "The name of Kinesis which is unique for each environment, used for logging to Splunk"
-    },
     "Memory": {
       "Type": "Number",
       "Description": "Soft memory on container",
@@ -283,26 +279,6 @@
         },
         "LogGroupName": {
           "Ref": "AWS::StackName"
-        }
-      }
-    },
-    "SubscriptionFilter": {
-      "Type": "AWS::Logs::SubscriptionFilter",
-      "DependsOn": ["LogGroup"],
-      "Properties": {
-        "RoleArn": {
-          "Fn::ImportValue": {
-            "Fn::Sub": "${KinesisStackName}-Role-Arn"
-          }
-        },
-        "LogGroupName": {
-          "Ref": "LogGroup"
-        },
-        "FilterPattern": "",
-        "DestinationArn": {
-          "Fn::ImportValue": {
-            "Fn::Sub": "${KinesisStackName}-Stream-Arn"
-          }
         }
       }
     },

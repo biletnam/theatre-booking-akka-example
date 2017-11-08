@@ -8,6 +8,5 @@
   "AppMinCount": "3",
   "Memory": "2048",
   "Cpu": "1024",
-  "KinesisStackName": "dev-splunk",
   "KmsKey": "arn:aws:kms:us-east-1:<account>:key/<key>"
 }
