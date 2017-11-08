@@ -30,7 +30,7 @@ You will receive an `HTTP 403` response with a body telling you `Theatre is at c
 
 ## Deployment ## 
 TODO: Describe how to release using a private Docker Registry like ECR or Docker Hub and deploy the application using
-AWS ECS with `ecs-service`
+AWS ECS with `ecs-service` along with [Docker-Mirror](https://github.com/LoyaltyOne/docker-mirror)
 
 ## Cluster Sharding ##
 
