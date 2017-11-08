@@ -2,7 +2,7 @@
   "ClusterStackName": "akka-clusters",
   "Path": "my-theatre",
   "AppName": "theatre-example",
-  "Priority": "100",
+  "Priority": "900",
   "AppDesiredCount": "3",
   "AppMaxCount": "7",
   "AppMinCount": "3",
