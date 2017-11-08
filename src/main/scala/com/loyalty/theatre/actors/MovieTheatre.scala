@@ -1,6 +1,6 @@
 package com.loyalty.theatre.actors
 
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.{ Actor, ActorLogging, Props }
 
 class MovieTheatre(maxSeatingCapacity: Int) extends Actor with ActorLogging {
   import com.loyalty.theatre.actors.MovieTheatre._

@@ -22,4 +22,3 @@ object Settings {
 
   def apply(config: Config): Settings = new Settings(config)
 }
-

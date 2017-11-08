@@ -11,7 +11,7 @@ import akka.pattern.ask
 import com.loyalty.theatre.actors.MovieTheatre._
 import com.loyalty.theatre.actors.sharding.MovieTheatreSettings.MovieTheatreEnvelope
 
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 trait Routes extends SprayJsonSupport {
   implicit val timeout: Timeout

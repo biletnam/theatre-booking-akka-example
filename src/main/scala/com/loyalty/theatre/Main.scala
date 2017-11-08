@@ -1,7 +1,7 @@
 package com.loyalty.theatre
 
 import akka.actor.ActorSystem
-import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
+import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
@@ -14,7 +14,7 @@ import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 object Main extends App with Routes {
   val config = ConfigFactory.load()
