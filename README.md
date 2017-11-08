@@ -29,6 +29,42 @@ When the theatre is at capacity (i.e. all tickets have been booked) and you try 
 You will receive an `HTTP 403` response with a body telling you `Theatre is at capacity`.
 
 ## Deployment ## 
+
+### Locally ###
+Start [Docker-Mirror](https://github.com/LoyaltyOne/docker-mirror) on port 9001 and mount the Docker socket and file 
+containing the IP of the host:
+```bash
+docker run --name docker-mirror -p 9001:9000 \
+ -v /var/run/docker.sock:/var/run/docker.sock \
+ -v /Users/cfernandes/hostip:/etc/hostip \
+ loyaltyone/docker-mirror:0.1.2
+```
+
+Confirm the service is running using `curl localhost:9001/health`
+
+Create a local release of the application using `sbt docker:publishLocal` which will create an image called
+`theatre-example:<current-version>`.
+
+Run the compose file for the dependencies (ZooKeeper):
+`docker-compose up`
+
+Make note of the network it uses using `docker network ls`
+
+Run the application on the same Docker network as the dependencies to take advantage of Docker's DNS capability:
+```bash
+docker run -it --network=theatreexample_theatre -p 9999:2551 -p 8080:8080 \
+ -e APP_PORT=2551 -e ZOOKEEPER_URIS="zookeeper:2181" \
+ theatre-example:0.1
+```
+
+Check whether the application works:
+```bash
+curl -X POST localhost:8080/theatres/star-wars/tickets/10
+```
+
+You should receive a response `10`
+
+### AWS ECS ###
 TODO: Describe how to release using a private Docker Registry like ECR or Docker Hub and deploy the application using
 AWS ECS with `ecs-service` along with [Docker-Mirror](https://github.com/LoyaltyOne/docker-mirror)
 
