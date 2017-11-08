@@ -7,6 +7,5 @@
   "AppMaxCount": "7",
   "AppMinCount": "3",
   "Memory": "2048",
-  "Cpu": "1024",
-  "KmsKey": "arn:aws:kms:us-east-1:<account>:key/<key>"
+  "Cpu": "1024"
 }

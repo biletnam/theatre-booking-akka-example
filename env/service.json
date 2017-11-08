@@ -75,10 +75,6 @@
       "Type": "Number",
       "Description": "Number of days to retain logs in CWL",
       "Default": "14"
-    },
-    "KmsKey": {
-      "Type": "String",
-      "Description": "The ARN of a KMS CMK to use to decrypt secure environment variables"
     }
   },
   "Resources": {
@@ -156,19 +152,7 @@
         },
 
         "Path": "/",
-        "Policies": [{
-          "PolicyName": "ECS-CMK-Decrypt-Access",
-          "PolicyDocument": {
-            "Version": "2012-10-17",
-            "Statement": [{
-              "Effect": "Allow",
-              "Action": ["kms:Decrypt"],
-              "Resource": [{
-                "Ref": "KmsKey"
-              }]
-            }]
-          }
-        }]
+        "Policies": []
       }
     },
     "TaskDefinition": {
