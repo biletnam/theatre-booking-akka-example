@@ -172,12 +172,10 @@
             "ContainerPort": {
               "Ref": "AppContainerPort"
             },
-            "HostPort": 0,
-            "Description": "Expose the HTTP port that the application uses and assign it to a random port"
+            "HostPort": 0
           }, {
             "ContainerPort": 2551,
-            "HostPort": 0,
-            "Description": "Expose the Akka Clustering port that the application uses and assign it to a random port"
+            "HostPort": 0
           }],
           "Command": ["-J-Xms1024m", "-J-Xmx1024m", "-J-XX:+HeapDumpOnOutOfMemoryError",
             {
