@@ -83,7 +83,8 @@ To deploy [version 0.3](https://hub.docker.com/r/rubixcubin/theatre-example/tags
 ecs-service deploy dev-theatre-example 0.3 env/service.json env/dev.params.json -e env/dev.env 
 ```
 
-You can make sure the service works by accessing:
+A CloudFormation stack will be created named `dev-theatre-example` and that can be used to monitor the creation process.
+Once the stack has been created successfully, you can make sure the service works by accessing:
 ```bash
 curl -k https://<ALB URL>/my-theatre/health
 ```
