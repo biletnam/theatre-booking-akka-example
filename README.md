@@ -78,7 +78,7 @@ to the cluster
 In the `dev.params.json` file, we have specified the target ECS cluster. The `service.json` describes how to deploy
 this application as an ECS Service and also route traffic to the service via the Application Load Balancer. 
 
-To deploy [version 0.3](https://hub.docker.com/r/rubixcubin/theatre-example) of the application, we use ecs-service:
+To deploy [version 0.3](https://hub.docker.com/r/rubixcubin/theatre-example/tags) of the application, we use ecs-service:
 ```bash
 ecs-service deploy dev-theatre-example 0.3 env/service.json env/dev.params.json -e env/dev.env 
 ```
