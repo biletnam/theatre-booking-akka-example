@@ -54,7 +54,7 @@ Run the application on the same Docker network as the dependencies to take advan
 ```bash
 docker run -it --network=theatreexample_theatre -p 9999:2551 -p 8080:8080 \
  -e APP_PORT=2551 -e ZOOKEEPER_URIS="zookeeper:2181" \
- theatre-example:0.1
+ theatre-example:0.4
 ```
 
 Check whether the application works:
@@ -78,9 +78,9 @@ to the cluster
 In the `dev.params.json` file, we have specified the target ECS cluster. The `service.json` describes how to deploy
 this application as an ECS Service and also route traffic to the service via the Application Load Balancer. 
 
-To deploy [version 0.3](https://hub.docker.com/r/rubixcubin/theatre-example/tags) of the application, we use ecs-service:
+To deploy [version 0.4](https://hub.docker.com/r/rubixcubin/theatre-example/tags) of the application, we use ecs-service:
 ```bash
-ecs-service deploy dev-theatre-example 0.3 env/service.json env/dev.params.json -e env/dev.env 
+ecs-service deploy dev-theatre-example 0.4 env/service.json env/dev.params.json -e env/dev.env 
 ```
 
 A CloudFormation stack will be created named `dev-theatre-example` and that can be used to monitor the creation process.
