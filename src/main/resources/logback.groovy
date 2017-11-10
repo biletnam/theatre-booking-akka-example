@@ -6,4 +6,4 @@ appender(name = "CONSOLE", clazz = ConsoleAppender) {
     }
 }
 
-root(level = DEBUG, appenderNames = ["CONSOLE"])
+root(level = INFO, appenderNames = ["CONSOLE"])
