@@ -24,4 +24,4 @@ curl -k https://<ALB URL>/my-theatre/health
 ```
 
 #### Further Details ####
-If you want to know more about the deployment process, see [here(https://github.com/LoyaltyOne/theatre-booking-akka-example/wiki/AWS-ECS-Deployments)
+If you want to know more about the deployment process, see [here](https://github.com/LoyaltyOne/theatre-booking-akka-example/wiki/AWS-ECS-Deployments)
