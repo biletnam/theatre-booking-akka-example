@@ -174,7 +174,7 @@
             },
             "HostPort": 0
           }, {
-            "ContainerPort": 2551,
+            "ContainerPort": 2552,
             "HostPort": 0
           }],
           "Command": ["-J-Xms1024m", "-J-Xmx1024m", "-J-XX:+HeapDumpOnOutOfMemoryError",
