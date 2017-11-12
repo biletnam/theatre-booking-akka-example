@@ -1,6 +1,6 @@
-### AWS EC2 Container Service (ECS) deployment ###
+# AWS EC2 Container Service (ECS) deployment #
 
-### Pre-requisites ###
+## Pre-requisites ##
 - An ECS cluster 
 - [Docker-Mirror](https://github.com/LoyaltyOne/docker-mirror) running on every single EC2 container instance belonging 
 to the cluster
@@ -8,7 +8,7 @@ to the cluster
 - [Access](https://github.com/LoyaltyOne/bazooka) to a [ZooKeeper ensemble](https://zookeeper.apache.org)
 - [ecs-service](https://github.com/ukayani/ecs-service)
 
-### Deployment ###
+## Deployment ##
 In the `dev.params.json` file, we have specified the target ECS cluster. The `service.json` describes how to deploy
 this application as an ECS Service and also route traffic to the service via the Application Load Balancer. 
 
@@ -23,5 +23,5 @@ Once the stack has been created successfully, you can make sure the service work
 curl -k https://<ALB URL>/my-theatre/health
 ```
 
-#### Further Details ####
+### Further Details ###
 If you want to know more about the deployment process, see [here](https://github.com/LoyaltyOne/theatre-booking-akka-example/wiki/AWS-ECS-Deployments)
