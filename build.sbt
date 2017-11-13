@@ -38,8 +38,8 @@ scalafmtOnCompile in Compile := true // current project, specific configuration
 
 dockerRepository := Some("rubixcubin")
 dockerUpdateLatest := true
-dockerBaseImage := "loyaltyone/dakka:0.4"
-dockerEntrypoint := "/usr/local/bin/env-decrypt" +: "/usr/local/bin/bootstrap" +: dockerEntrypoint.value
+dockerBaseImage := "loyaltyone/dakka:0.5"
+dockerEntrypoint := "/usr/local/bin/bootstrap" +: dockerEntrypoint.value
 
 // Release process creates a Git Tag and publishing the image on Docker Hub
 releaseProcess := Seq[ReleaseStep](
