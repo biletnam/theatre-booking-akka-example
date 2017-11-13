@@ -1,8 +1,7 @@
 import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport._
+import ReleaseTransformations._
 
 name := "theatre-example"
-
-version := "0.6"
 
 scalaVersion := "2.12.4"
 
@@ -41,3 +40,17 @@ dockerRepository := Some("rubixcubin")
 dockerUpdateLatest := true
 dockerBaseImage := "loyaltyone/dakka:0.4"
 dockerEntrypoint := "/usr/local/bin/env-decrypt" +: "/usr/local/bin/bootstrap" +: dockerEntrypoint.value
+
+// Release process creates a Git Tag and publishing the image on Docker Hub
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  releaseStepTask(publish in Docker),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)
