@@ -3,9 +3,9 @@
   "Path": "my-theatre",
   "AppName": "theatre-example",
   "Priority": "900",
-  "AppDesiredCount": "1",
+  "AppDesiredCount": "2",
   "AppMaxCount": "3",
-  "AppMinCount": "1",
+  "AppMinCount": "2",
   "Memory": "1024",
   "Cpu": "512"
 }
