@@ -34,7 +34,7 @@
     "ImageRepository": {
       "Type": "String",
       "Description": "The URI of the image repository where the app is published. Do not include app name in URI.",
-      "Default": "rubixcubin"
+      "Default": "loyaltyone"
     },
     "Memory": {
       "Type": "Number",
