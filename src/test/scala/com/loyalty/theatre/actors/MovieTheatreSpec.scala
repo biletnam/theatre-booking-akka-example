@@ -3,10 +3,11 @@ package com.loyalty.theatre.actors
 import akka.actor.ActorSystem
 import akka.testkit.{ ImplicitSender, TestKit }
 import com.loyalty.theatre.StopActorSystemAfterAll
+import com.typesafe.config.ConfigFactory
 import org.scalatest.FunSpecLike
 
 class MovieTheatreSpec
-    extends TestKit(ActorSystem("movie-theatre-test-system"))
+    extends TestKit(ActorSystem("movie-theatre-test-system", ConfigFactory.load("test")))
     with FunSpecLike
     with ImplicitSender
     with StopActorSystemAfterAll {
