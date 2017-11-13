@@ -8,7 +8,7 @@ scalaVersion := "2.12.4"
 
 lazy val root = (project in file(".")).enablePlugins(JavaAppPackaging)
 
-resolvers += Resolver.bintrayRepo("tanukkii007", "maven")
+resolvers ++= Seq(Resolver.sbtPluginRepo("releases"), Resolver.bintrayRepo("tanukkii007", "maven"))
 
 libraryDependencies ++= {
   val akka = "com.typesafe.akka"
